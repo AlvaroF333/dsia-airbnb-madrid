@@ -1,0 +1,3 @@
+# Instala el paquete en modo editable con las dependencias de desarrollo.
+# Las versiones mínimas están en pyproject.toml.
+-e .[dev]

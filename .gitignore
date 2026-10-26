@@ -1,0 +1,28 @@
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+.DS_Store
+*.log
+
+# Datos completos y artefactos generados (la muestra de data/sample sí se versiona)
+data/raw/
+data/processed/
+cache/
+reports/*
+!reports/.gitkeep
