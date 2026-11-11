@@ -12,7 +12,7 @@ from airbnb_price.exceptions import ConfigError
 AI_PROVIDERS = ("mock", "hf")
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR")
 DEFAULT_HF_SENTIMENT_MODEL = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
-DEFAULT_HF_CHAT_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
+DEFAULT_HF_CHAT_MODEL = "Qwen/Qwen2.5-72B-Instruct"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 

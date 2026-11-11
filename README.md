@@ -4,7 +4,7 @@ Trabajo Final de **Desarrollo de Soluciones de IA** (DSIA 2026-2027). Este repos
 
 Estima el precio por noche de un alojamiento turístico en Madrid con un modelo de **scikit-learn** entrenado con datos de Inside Airbnb. Después **enriquece con modelos del Hub de Hugging Face** los alojamientos cuyo precio anunciado más se desvía del estimado: calcula el sentimiento de sus reseñas y genera una explicación en lenguaje natural.
 
-> **Estado (v0.2.0):** ingesta, modelo, pipeline `run`, cliente de IA `mock`/`hf`, tests y CI terminados. El modelo versionado está entrenado con los datos reales completos. El proveedor real de Hugging Face está implementado y probado con un cliente falso, pero **aún no se ha verificado contra la API real** (`make hf-smoke`, ver [Borde de Hugging Face](#4-borde-de-hugging-face)).
+> **Estado (v0.2.0):** ingesta, modelo, pipeline `run`, cliente de IA `mock`/`hf`, tests y CI terminados. El modelo versionado está entrenado con los datos reales completos. El proveedor real de Hugging Face está implementado y probado con un cliente falso. Contra la API real se ha verificado la autenticación y la degradación del pipeline, pero no se han obtenido respuestas porque la cuenta no tiene crédito de Inference Providers (detalle en [`AI_USAGE.md`](AI_USAGE.md#evidencia-del-proveedor-real-11-nov-2026)).
 
 ## Datos
 
@@ -153,7 +153,7 @@ El resto del proyecto solo conoce el `Protocol` `AIClient` (`ai/base.py`), con d
 | --- | --- | --- |
 | Red y claves | No | `HF_TOKEN` en `.env` |
 | Sentimiento | Cuenta palabras positivas y negativas (español e inglés) | **`text_classification`** con `cardiffnlp/twitter-xlm-roberta-base-sentiment` (multilingüe; negative/neutral/positive) |
-| Explicación | Plantilla fija con prefijo `[mock]` | **`chat_completion`** con `mistralai/Mistral-7B-Instruct-v0.3`, `max_tokens=150`, dos frases en español solo con datos del alojamiento |
+| Explicación | Plantilla fija con prefijo `[mock]` | **`chat_completion`** con `Qwen/Qwen2.5-72B-Instruct`, `max_tokens=150`, dos frases en español solo con datos del alojamiento |
 | Uso | Tests, CI y demo sin claves | Ejecución real |
 
 Ambos modelos se pueden cambiar con `HF_SENTIMENT_MODEL` y `HF_CHAT_MODEL`. El score se normaliza a 0..1 con una función pura que admite etiquetas `negative/neutral/positive`, `LABEL_0..2` y `1–5 stars` (por ejemplo, `nlptown/bert-base-multilingual-uncased-sentiment`).
@@ -168,7 +168,7 @@ make hf-smoke                      # o: AI_PROVIDER=hf python scripts/hf_smoke.p
 AI_PROVIDER=hf python -m airbnb_price run --top-n 5
 ```
 
-`make hf-smoke` clasifica dos frases y pide una explicación. Si un modelo responde 404 porque ya no está servido por ningún proveedor de Inference, se cambia la variable y se anota en [`AI_USAGE.md`](AI_USAGE.md).
+`make hf-smoke` clasifica dos frases y pide una explicación. Si un modelo deja de estar servido por algún proveedor de Inference, se cambia la variable y se anota en [`AI_USAGE.md`](AI_USAGE.md). Ya ocurrió con `mistralai/Mistral-7B-Instruct-v0.3`, el modelo de chat inicial, sustituido por `Qwen/Qwen2.5-72B-Instruct`. Un `402 Payment Required` indica que la cuenta no tiene crédito: el pipeline lo trata como un fallo de la IA y entrega igualmente los precios.
 
 ## Tests y calidad
 
