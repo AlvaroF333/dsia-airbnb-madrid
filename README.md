@@ -64,7 +64,7 @@ python -m airbnb_price info        # muestra la configuración efectiva, sin sec
 ```bash
 pytest -q                                                   # todo
 pytest -q -m "not integration"                              # solo unitarios
-pytest -q --cov --cov-report=term-missing --cov-fail-under=70
+pytest -q --cov --cov-report=term-missing --cov-fail-under=80
 make lint                                                   # ruff check + format
 pre-commit install                                          # hooks antes de cada commit
 ```
