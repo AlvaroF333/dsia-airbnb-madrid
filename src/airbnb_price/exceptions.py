@@ -29,3 +29,9 @@ class DataValidationError(AirbnbPriceError):
     """Los datos de entrada no cumplen el schema acordado."""
 
     exit_code = EXIT_INVALID_INPUT
+
+
+class DataLoadError(AirbnbPriceError):
+    """El fichero de entrada no existe o no se puede leer."""
+
+    exit_code = EXIT_INVALID_INPUT
