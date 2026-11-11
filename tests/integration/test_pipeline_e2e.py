@@ -55,6 +55,18 @@ def test_run_end_to_end_with_mock(home):
     assert {"ingesta_s", "prediccion_s", "ia_s", "total_s"} <= metrics["duracion"].keys()
 
 
+def test_run_does_not_overwrite_training_data(home):
+    training = home / "data" / "processed" / "listings_clean.csv"
+    before = training.read_bytes()
+    (home / "data" / "sample" / "listings_sample.csv").write_text(
+        make_synthetic_listings(n=60, seed=9).to_csv(index=False), encoding="utf-8"
+    )
+
+    assert main(["run", "--top-n", "1"]) == EXIT_OK
+
+    assert training.read_bytes() == before
+
+
 def test_run_degrades_when_ai_always_fails(home, monkeypatch, capsys):
     monkeypatch.setattr("airbnb_price.pipeline.get_client", lambda settings: FailingClient())
 

@@ -26,3 +26,6 @@ data/processed/
 cache/
 reports/*
 !reports/.gitkeep
+
+# Logs del pipeline (scripts/run_pipeline.sh)
+logs/

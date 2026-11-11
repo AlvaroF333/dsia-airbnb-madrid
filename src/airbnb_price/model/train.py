@@ -158,7 +158,7 @@ def run_train(input_path: Path, model_dir: Path, metrics_path: Path, seed: int =
     meta = {
         **result.meta,
         "entrenado_en": datetime.now(UTC).isoformat(timespec="seconds"),
-        "datos": str(input_path),
+        "datos": Path(input_path).name,
         "datos_sha256": _sha256(input_path),
         "metricas_test": result.metrics["modelo"],
     }

@@ -147,11 +147,12 @@ def run_pipeline(
         timings[stage] = round(now - since, 3)
         return now
 
-    clean_path = settings.data_dir / "processed" / "listings_clean.csv"
+    # Ficheros propios del pipeline: no pisan el CSV limpio con el que se entrena.
+    clean_path = settings.data_dir / "processed" / "run_listings_clean.csv"
     ingest_metrics = run_ingest(
         input_path=input_path,
         output_path=clean_path,
-        metrics_path=settings.reports_dir / "ingest_metrics.json",
+        metrics_path=settings.reports_dir / "run_ingest_metrics.json",
         max_error_rate=max_error_rate,
     )
     listings = load_listings(clean_path)
