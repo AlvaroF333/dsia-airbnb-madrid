@@ -118,13 +118,15 @@ Códigos de salida de la CLI: `0` correcto, `1` fallo del sistema o de una depen
 ```python
 @dataclass(frozen=True)
 class SentimentResult:
-    score: float        # 0..1, probabilidad de sentimiento positivo
-    label: str          # "positive" | "neutral" | "negative"
+    score: float  # 0..1, probabilidad de sentimiento positivo
+    label: str  # "positive" | "neutral" | "negative"
     provider: str
     model: str
 
+
 class AIClient(Protocol):
     name: str
+
     def sentiment(self, texts: Sequence[str]) -> list[SentimentResult]: ...
     def explain(self, context: Mapping[str, object]) -> str: ...
 ```

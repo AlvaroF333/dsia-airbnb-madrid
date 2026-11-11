@@ -11,6 +11,8 @@ from airbnb_price.exceptions import ConfigError
 
 AI_PROVIDERS = ("mock", "hf")
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR")
+DEFAULT_HF_SENTIMENT_MODEL = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
+DEFAULT_HF_CHAT_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -22,6 +24,8 @@ class Settings:
     hf_token: str | None
     log_level: str
     home: Path
+    hf_sentiment_model: str = DEFAULT_HF_SENTIMENT_MODEL
+    hf_chat_model: str = DEFAULT_HF_CHAT_MODEL
 
     @property
     def data_dir(self) -> Path:
@@ -34,6 +38,10 @@ class Settings:
     @property
     def reports_dir(self) -> Path:
         return self.home / "reports"
+
+    @property
+    def cache_dir(self) -> Path:
+        return self.home / "cache"
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Settings:
@@ -58,4 +66,12 @@ class Settings:
             raise ConfigError(f"LOG_LEVEL no válido: {level!r} (usa {LOG_LEVELS})")
 
         home = Path(env.get("AIRBNB_PRICE_HOME", "") or PROJECT_ROOT)
-        return cls(ai_provider=provider, hf_token=token, log_level=level, home=home)
+        return cls(
+            ai_provider=provider,
+            hf_token=token,
+            log_level=level,
+            home=home,
+            hf_sentiment_model=env.get("HF_SENTIMENT_MODEL", "").strip()
+            or DEFAULT_HF_SENTIMENT_MODEL,
+            hf_chat_model=env.get("HF_CHAT_MODEL", "").strip() or DEFAULT_HF_CHAT_MODEL,
+        )
