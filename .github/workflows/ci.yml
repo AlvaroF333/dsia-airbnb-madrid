@@ -26,4 +26,14 @@ jobs:
           ruff check .
           ruff format --check .
       - name: Tests + cobertura
-        run: pytest -q --cov --cov-report=term-missing --cov-fail-under=70
+        run: pytest -q --cov --cov-report=term-missing --cov-fail-under=80
+      - name: Tests de integración
+        run: pytest -q -m integration
+      - name: Flujo completo sobre la muestra (sin claves ni red hacia HF)
+        run: |
+          make all
+          test -s reports/predictions.csv
+          test -s reports/run_metrics.json
+          grep -q '"ai_provider": "mock"' reports/run_metrics.json
+      - name: El envoltorio de cron propaga el código de salida
+        run: bash scripts/run_pipeline.sh --top-n 5 && tail -n 3 logs/pipeline.log

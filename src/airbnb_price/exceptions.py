@@ -29,3 +29,21 @@ class DataValidationError(AirbnbPriceError):
     """Los datos de entrada no cumplen el schema acordado."""
 
     exit_code = EXIT_INVALID_INPUT
+
+
+class DataLoadError(AirbnbPriceError):
+    """El fichero de entrada no existe o no se puede leer."""
+
+    exit_code = EXIT_INVALID_INPUT
+
+
+class ModelNotFoundError(AirbnbPriceError):
+    """No existe un modelo entrenado en la ruta indicada."""
+
+    exit_code = EXIT_INVALID_INPUT
+
+
+class AIClientError(AirbnbPriceError):
+    """Fallo del proveedor de IA (dependencia externa)."""
+
+    exit_code = EXIT_ERROR
