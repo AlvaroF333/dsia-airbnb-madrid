@@ -87,9 +87,11 @@ class MockClient:
         return SentimentResult(score, label_for(score), self.name, self.sentiment_model)
 
     def explain(self, context: Mapping[str, object]) -> str:
+        guests = context.get("accommodates", "?")
+        people = "persona" if str(guests) == "1" else "personas"
         return (
             f"[mock] Alojamiento en {context.get('barrio', 'Madrid')} para "
-            f"{context.get('accommodates', '?')} personas: precio estimado "
+            f"{guests} {people}: precio estimado "
             f"{context.get('precio_estimado', '?')} € frente a {context.get('precio', '?')} € "
             "anunciados."
         )
