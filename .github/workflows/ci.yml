@@ -34,6 +34,7 @@ jobs:
           make all
           test -s reports/predictions.csv
           test -s reports/run_metrics.json
+          grep -q 'más desviados' reports/report.md
           grep -q '"ai_provider": "mock"' reports/run_metrics.json
       - name: El envoltorio de cron propaga el código de salida
         run: bash scripts/run_pipeline.sh --top-n 5 && tail -n 3 logs/pipeline.log

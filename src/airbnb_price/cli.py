@@ -1,6 +1,6 @@
 """Punto de entrada de línea de comandos: ``python -m airbnb_price``.
 
-Comandos: ``info``, ``ingest``, ``train``, ``predict``, ``sentiment`` y ``run``.
+Comandos: ``info``, ``ingest``, ``tune``, ``train``, ``predict``, ``sentiment`` y ``run``.
 La CLI es una entrada fina: traduce argumentos y delega en el núcleo; no limpia
 datos ni llama a Hugging Face directamente.
 """
@@ -39,6 +39,13 @@ def build_parser() -> argparse.ArgumentParser:
     ingest.add_argument("--output", type=Path, help="CSV limpio de salida")
     ingest.add_argument("--metrics", type=Path, help="JSON de métricas de la ingesta")
     _add_max_error_rate(ingest)
+
+    tune = sub.add_parser("tune", help="Busca hiperparámetros con validación cruzada (lento)")
+    tune.add_argument("--input", type=Path, help="CSV limpio (salida de ingest)")
+    tune.add_argument("--model-dir", type=Path, help="Directorio donde guardar hparams.json")
+    tune.add_argument("--n-iter", type=int, default=30, help="Combinaciones a probar (30)")
+    tune.add_argument("--seed", type=int, default=42, help="Semilla (por defecto 42)")
+    tune.add_argument("--n-jobs", type=int, default=-1, help="Procesos en paralelo (-1: todos)")
 
     train = sub.add_parser("train", help="Entrena y evalúa el modelo de precio")
     train.add_argument("--input", type=Path, help="CSV limpio (salida de ingest)")
@@ -98,6 +105,20 @@ def cmd_ingest(settings: Settings, args: argparse.Namespace) -> int:
         f"rows_in={metrics['rows_in']} rows_out={metrics['rows_out']} "
         f"error_rate={metrics['error_rate']}"
     )
+    return EXIT_OK
+
+
+def cmd_tune(settings: Settings, args: argparse.Namespace) -> int:
+    from airbnb_price.model.train import run_tune
+
+    result = run_tune(
+        input_path=args.input or settings.data_dir / "processed" / "listings_clean.csv",
+        model_dir=args.model_dir or settings.models_dir,
+        seed=args.seed,
+        n_iter=args.n_iter,
+        n_jobs=args.n_jobs,
+    )
+    _print_json({k: result[k] for k in ("hiperparametros", "cv_mae", "cv_mae_por_defecto")})
     return EXIT_OK
 
 
@@ -168,6 +189,7 @@ def cmd_run(settings: Settings, args: argparse.Namespace) -> int:
 COMMANDS = {
     "info": cmd_info,
     "ingest": cmd_ingest,
+    "tune": cmd_tune,
     "train": cmd_train,
     "predict": cmd_predict,
     "sentiment": cmd_sentiment,

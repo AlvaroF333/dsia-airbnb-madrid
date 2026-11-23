@@ -9,10 +9,12 @@ from pathlib import Path
 
 from airbnb_price.exceptions import ConfigError
 
-AI_PROVIDERS = ("mock", "hf")
+AI_PROVIDERS = ("mock", "hf", "ollama")
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR")
 DEFAULT_HF_SENTIMENT_MODEL = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
 DEFAULT_HF_CHAT_MODEL = "Qwen/Qwen2.5-72B-Instruct"
+DEFAULT_OLLAMA_URL = "http://localhost:11434"
+DEFAULT_OLLAMA_MODEL = "qwen2.5:1.5b"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -26,6 +28,8 @@ class Settings:
     home: Path
     hf_sentiment_model: str = DEFAULT_HF_SENTIMENT_MODEL
     hf_chat_model: str = DEFAULT_HF_CHAT_MODEL
+    ollama_url: str = DEFAULT_OLLAMA_URL
+    ollama_model: str = DEFAULT_OLLAMA_MODEL
 
     @property
     def data_dir(self) -> Path:
@@ -74,4 +78,6 @@ class Settings:
             hf_sentiment_model=env.get("HF_SENTIMENT_MODEL", "").strip()
             or DEFAULT_HF_SENTIMENT_MODEL,
             hf_chat_model=env.get("HF_CHAT_MODEL", "").strip() or DEFAULT_HF_CHAT_MODEL,
+            ollama_url=env.get("OLLAMA_URL", "").strip() or DEFAULT_OLLAMA_URL,
+            ollama_model=env.get("OLLAMA_MODEL", "").strip() or DEFAULT_OLLAMA_MODEL,
         )

@@ -8,6 +8,7 @@ from airbnb_price.features.build import (
     build_features,
     count_amenities,
     haversine_km,
+    host_years,
     parse_bathrooms,
 )
 from tests.conftest import make_listing
@@ -70,3 +71,39 @@ def test_build_features_handles_missing_values():
     assert pd.isna(features.loc[0, "bedrooms"])
     assert features.loc[0, "room_type"] == "desconocido"
     assert features.loc[0, "n_amenities"] == 0
+
+
+def test_build_features_new_variables(listings_frame):
+    features = build_features(listings_frame)
+    first = features.iloc[0]
+
+    assert first["host_years"] == pytest.approx(8.5)
+    assert first["property_type"] == "Entire rental unit"
+    assert first["neighbourhood_cleansed"] == "Sol"
+
+
+def test_build_features_tolerates_missing_optional_columns():
+    """Una predicción puntual solo trae lo obligatorio: el resto queda nulo y se imputa."""
+    frame = pd.DataFrame(
+        [{"latitude": 40.42, "longitude": -3.70, "room_type": "Private room", "accommodates": 2}]
+    )
+
+    features = build_features(frame)
+
+    assert list(features.columns) == list(FEATURES)
+    assert pd.isna(features.loc[0, "availability_365"])
+    assert pd.isna(features.loc[0, "host_years"])
+    assert features.loc[0, "property_type"] == "desconocido"
+
+
+def test_host_years_combines_years_and_months():
+    years = host_years(pd.Series([3, None, 2]), pd.Series([6, 4, None]))
+
+    assert years.iloc[0] == pytest.approx(3.5)
+    assert pd.isna(years.iloc[1])
+    assert years.iloc[2] == pytest.approx(2.0)
+
+
+def test_leaky_columns_are_not_features():
+    leaky_or_empty = {"estimated_revenue_l365d", "price", "price_quote_total_price", "host_since"}
+    assert not leaky_or_empty & set(FEATURES)

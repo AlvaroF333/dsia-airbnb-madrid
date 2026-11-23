@@ -3,6 +3,9 @@
 El precio estimado es el producto; la IA lo enriquece. Si el proveedor de IA
 falla, el pipeline termina igualmente con todas las predicciones y deja vacíos
 el sentimiento y la explicación de los alojamientos afectados.
+
+Informes: ``predictions.csv`` (todas las filas), ``run_metrics.json`` (para
+máquinas) y ``report.md`` (para personas).
 """
 
 from __future__ import annotations
@@ -11,6 +14,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -23,6 +27,7 @@ from airbnb_price.data.loader import load_listings, load_reviews
 from airbnb_price.data.validator import clean_reviews
 from airbnb_price.exceptions import AIClientError
 from airbnb_price.model.predict import load_model, predict
+from airbnb_price.report import render_report
 
 logger = logging.getLogger("airbnb_price.pipeline")
 
@@ -214,6 +219,11 @@ def run_pipeline(
     metrics_path.write_text(
         json.dumps(metrics, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+    report_path = settings.reports_dir / "report.md"
+    generated_at = datetime.now(UTC).isoformat(timespec="seconds")
+    report_path.write_text(
+        render_report(frame, outliers, metrics, meta, generated_at), encoding="utf-8"
+    )
 
     if stats.errors:
         logger.warning(
@@ -230,5 +240,5 @@ def run_pipeline(
         stats.calls,
         timings["total_s"],
     )
-    logger.info("predictions=%s metrics=%s", predictions_path, metrics_path)
+    logger.info("predictions=%s metrics=%s report=%s", predictions_path, metrics_path, report_path)
     return metrics

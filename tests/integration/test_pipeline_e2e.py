@@ -54,6 +54,10 @@ def test_run_end_to_end_with_mock(home):
     assert metrics["filas_enriquecidas"] == 10
     assert {"ingesta_s", "prediccion_s", "ia_s", "total_s"} <= metrics["duracion"].keys()
 
+    report = (home / "reports" / "report.md").read_text(encoding="utf-8")
+    assert "## Los 10 alojamientos más desviados" in report
+    assert "[mock]" in report
+
 
 def test_run_does_not_overwrite_training_data(home):
     training = home / "data" / "processed" / "listings_clean.csv"
@@ -136,3 +140,15 @@ def test_sentiment_command_uses_mock(capsys):
     out = json.loads(capsys.readouterr().out)
     assert [r["label"] for r in out] == ["positive", "negative"]
     assert {r["provider"] for r in out} == {"mock"}
+
+
+def test_tune_then_train_uses_saved_hparams(home, monkeypatch):
+    monkeypatch.setattr("airbnb_price.model.train.SEARCH_SPACE", {"max_iter": [25, 50]})
+
+    assert main(["tune", "--n-iter", "2", "--n-jobs", "1"]) == EXIT_OK
+    assert main(["train"]) == EXIT_OK
+
+    hparams = json.loads((home / "models" / "hparams.json").read_text(encoding="utf-8"))
+    meta = json.loads((home / "models" / "model_meta.json").read_text(encoding="utf-8"))
+    assert meta["hiperparametros"]["max_iter"] == hparams["hiperparametros"]["max_iter"]
+    assert hparams["cv_mae"] > 0

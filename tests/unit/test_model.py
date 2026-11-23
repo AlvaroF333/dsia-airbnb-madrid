@@ -5,7 +5,17 @@ import pytest
 
 from airbnb_price.exceptions import DataValidationError, ModelNotFoundError
 from airbnb_price.model.predict import load_model, predict
-from airbnb_price.model.train import META_FILENAME, MODEL_FILENAME, run_train, train_model
+from airbnb_price.model.train import (
+    DEFAULT_HPARAMS,
+    META_FILENAME,
+    MODEL_FILENAME,
+    SEARCH_SPACE,
+    load_hparams,
+    run_train,
+    run_tune,
+    train_model,
+    tune_hparams,
+)
 from tests.conftest import make_listing
 
 
@@ -85,3 +95,60 @@ def test_predict_handles_unknown_category_and_nulls(model_dir):
 def test_load_model_missing_raises_domain_error(tmp_path):
     with pytest.raises(ModelNotFoundError, match="train"):
         load_model(tmp_path)
+
+
+def test_metrics_include_error_analysis_and_importance(trained):
+    analysis = trained.metrics["analisis_error"]
+
+    assert sum(band["n"] for band in analysis["por_tramo_precio"]) == trained.metrics["n_test"]
+    assert {"tramo", "n", "mae", "sesgo"} <= analysis["por_tramo_precio"][0].keys()
+    maes = [row["mae"] for row in analysis["por_distrito"]]
+    assert maes == sorted(maes, reverse=True)
+
+    importance = trained.metrics["importancia_variables"]
+    assert len(importance) == len(trained.meta["features"])
+    # El precio sintético depende sobre todo de la capacidad
+    assert importance[0]["variable"] == "accommodates"
+
+
+def test_custom_hparams_are_used_and_recorded(synthetic_listings):
+    result = train_model(synthetic_listings, seed=42, hparams={"max_iter": 20})
+
+    assert result.model.regressor_.named_steps["reg"].max_iter == 20
+    assert result.meta["hiperparametros"]["max_iter"] == 20
+    assert result.metrics["hiperparametros"]["learning_rate"] == DEFAULT_HPARAMS["learning_rate"]
+
+
+def test_tune_never_uses_test_rows(synthetic_listings):
+    result = tune_hparams(synthetic_listings, seed=42, n_iter=2, cv=2, n_jobs=1)
+
+    assert result["n_train"] == int(len(synthetic_listings) * 0.8)
+    assert set(result["hiperparametros"]) == set(SEARCH_SPACE)
+    for name, value in result["hiperparametros"].items():
+        assert value in SEARCH_SPACE[name]
+
+
+def test_run_tune_writes_hparams_used_by_train(tmp_path, synthetic_listings, monkeypatch):
+    csv = tmp_path / "listings_clean.csv"
+    synthetic_listings.to_csv(csv, index=False)
+    models = tmp_path / "models"
+    monkeypatch.setattr("airbnb_price.model.train.SEARCH_SPACE", {"max_iter": [30]})
+
+    run_tune(csv, models, n_iter=1, n_jobs=1)
+    assert load_hparams(models) == {"max_iter": 30}
+
+    run_train(csv, models, tmp_path / "reports" / "model_metrics.json")
+    meta = json.loads((models / META_FILENAME).read_text(encoding="utf-8"))
+    assert meta["hiperparametros"]["max_iter"] == 30
+
+
+def test_load_hparams_without_file_returns_none(tmp_path):
+    assert load_hparams(tmp_path) is None
+
+
+def test_empty_feature_column_raises_domain_error(synthetic_listings):
+    """Inside Airbnb a veces deja de publicar una columna: error claro, no un traceback."""
+    frame = synthetic_listings.assign(availability_365=None)
+
+    with pytest.raises(DataValidationError, match="availability_365"):
+        train_model(frame)
