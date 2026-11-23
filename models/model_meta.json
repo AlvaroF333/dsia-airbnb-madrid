@@ -1,5 +1,5 @@
 {
-  "modelo_version": "0.2.0",
+  "modelo_version": "0.3.0",
   "sklearn_version": "1.9.1",
   "seed": 42,
   "n_filas": 18620,
@@ -7,26 +7,46 @@
     "accommodates",
     "bedrooms",
     "beds",
-    "bathrooms",
-    "n_amenities",
     "minimum_nights",
+    "maximum_nights",
     "number_of_reviews",
+    "number_of_reviews_ltm",
+    "reviews_per_month",
     "review_scores_rating",
-    "is_superhost",
-    "dist_sol_km",
+    "review_scores_cleanliness",
+    "review_scores_location",
+    "review_scores_value",
+    "availability_30",
+    "availability_365",
+    "host_listings_count",
+    "calculated_host_listings_count",
     "latitude",
     "longitude",
+    "bathrooms",
+    "n_amenities",
+    "is_superhost",
+    "host_years",
+    "dist_sol_km",
     "room_type",
-    "neighbourhood_group_cleansed"
+    "property_type",
+    "neighbourhood_group_cleansed",
+    "neighbourhood_cleansed"
   ],
   "target": "price",
-  "entrenado_en": "2026-11-11T10:11:31+00:00",
+  "hiperparametros": {
+    "learning_rate": 0.03,
+    "max_iter": 600,
+    "max_leaf_nodes": 127,
+    "min_samples_leaf": 5,
+    "l2_regularization": 1.0
+  },
+  "entrenado_en": "2026-11-23T17:40:46+00:00",
   "datos": "listings_clean.csv",
   "datos_sha256": "88d606e5ede7085258271753d23a51fdc0cd2227c3351dea06aca284730a08a0",
   "metricas_test": {
-    "mae": 54.21,
-    "rmse": 96.7,
-    "r2": 0.5257,
-    "medae": 29.21
+    "mae": 47.25,
+    "rmse": 86.29,
+    "r2": 0.6224,
+    "medae": 25.65
   }
 }
