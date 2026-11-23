@@ -8,6 +8,15 @@ from airbnb_price.config import Settings
 
 
 def get_client(settings: Settings) -> AIClient:
+    if settings.ai_provider == "ollama":
+        from airbnb_price.ai.cache import SentimentCache
+        from airbnb_price.ai.ollama import OllamaClient
+
+        return OllamaClient(
+            base_url=settings.ollama_url,
+            model=settings.ollama_model,
+            cache=SentimentCache(settings.cache_dir / "sentiment.jsonl"),
+        )
     if settings.ai_provider == "hf":
         from airbnb_price.ai.cache import SentimentCache
         from airbnb_price.ai.hf import HFClient
