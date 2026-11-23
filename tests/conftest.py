@@ -29,6 +29,19 @@ def make_listing(**overrides):
         "review_scores_rating": 4.7,
         "host_is_superhost": "t",
         "price": "$120.00",
+        "property_type": "Entire rental unit",
+        "maximum_nights": 365,
+        "number_of_reviews_ltm": 8,
+        "reviews_per_month": 1.2,
+        "review_scores_cleanliness": 4.8,
+        "review_scores_location": 4.9,
+        "review_scores_value": 4.6,
+        "availability_30": 10,
+        "availability_365": 200,
+        "host_listings_count": 1,
+        "calculated_host_listings_count": 1,
+        "hosts_time_as_host_years": 8,
+        "hosts_time_as_host_months": 6,
     }
     row.update(overrides)
     return row
@@ -83,6 +96,21 @@ def make_synthetic_listings(n: int = 300, seed: int = 0):
             "review_scores_rating": np.round(rng.uniform(3.5, 5.0, n), 2),
             "host_is_superhost": rng.choice(["t", "f"], n),
             "price": np.round(price, 2),
+            "property_type": np.where(
+                room_type == "Entire home/apt", "Entire rental unit", "Private room in rental unit"
+            ),
+            "maximum_nights": rng.choice([30, 365, 1125], n),
+            "number_of_reviews_ltm": rng.integers(0, 40, n),
+            "reviews_per_month": np.round(rng.uniform(0, 5, n), 2),
+            "review_scores_cleanliness": np.round(rng.uniform(3.5, 5.0, n), 2),
+            "review_scores_location": np.round(rng.uniform(3.5, 5.0, n), 2),
+            "review_scores_value": np.round(rng.uniform(3.5, 5.0, n), 2),
+            "availability_30": rng.integers(0, 31, n),
+            "availability_365": rng.integers(0, 366, n),
+            "host_listings_count": rng.integers(1, 20, n),
+            "calculated_host_listings_count": rng.integers(1, 20, n),
+            "hosts_time_as_host_years": rng.integers(0, 15, n),
+            "hosts_time_as_host_months": rng.integers(0, 12, n),
         }
     )
 

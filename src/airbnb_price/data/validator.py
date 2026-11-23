@@ -26,6 +26,20 @@ REQUIRED_COLUMNS = (
     "review_scores_rating",
     "host_is_superhost",
     "price",
+    # Añadidas en v0.3.0 para el modelo (todas existen en el listings detallado)
+    "property_type",
+    "maximum_nights",
+    "number_of_reviews_ltm",
+    "reviews_per_month",
+    "review_scores_cleanliness",
+    "review_scores_location",
+    "review_scores_value",
+    "availability_30",
+    "availability_365",
+    "host_listings_count",
+    "calculated_host_listings_count",
+    "hosts_time_as_host_years",
+    "hosts_time_as_host_months",
 )
 
 PRICE_MIN, PRICE_MAX = 10.0, 1000.0
@@ -92,9 +106,7 @@ def clean_listings(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
 
 PREDICT_REQUIRED = ("latitude", "longitude", "room_type", "accommodates")
 PREDICT_OPTIONAL = tuple(
-    column
-    for column in REQUIRED_COLUMNS
-    if column not in PREDICT_REQUIRED and column not in ("price", "neighbourhood_cleansed")
+    column for column in REQUIRED_COLUMNS if column not in PREDICT_REQUIRED and column != "price"
 )
 
 
